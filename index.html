@@ -42,9 +42,12 @@
       </a>
       <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
         <a href="#about" class="hover:text-white transition-colors">About</a>
+        <a href="#education" class="hover:text-white transition-colors">Education</a>
         <a href="#projects" class="hover:text-white transition-colors">Projects</a>
         <a href="#xneon" class="hover:text-white transition-colors">XNEON</a>
         <a href="#skills" class="hover:text-white transition-colors">Skills</a>
+        <a href="#brands" class="hover:text-white transition-colors">Brands</a>
+        <a href="#socials" class="hover:text-white transition-colors">Socials</a>
         <a href="#contact" class="hover:text-white transition-colors">Contact</a>
       </nav>
     </div>
@@ -99,9 +102,17 @@
     </div>
   </section>
 
+  <!-- Education Section -->
+  <section id="education" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">Education & Institute</h2>
+    <div id="education-grid" class="space-y-4">
+      <div class="text-slate-500 text-sm">Loading education data...</div>
+    </div>
+  </section>
+
   <!-- Projects Section -->
   <section id="projects" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-800">
-    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">Featured Projects</h2>
+    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">Featured Projects & Portfolios</h2>
     <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="text-slate-500 text-sm">Loading projects from Firestore...</div>
     </div>
@@ -126,10 +137,27 @@
     </div>
   </section>
 
+  <!-- Brands / Technologies Section -->
+  <section id="brands" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">Technologies & Brands</h2>
+    <div id="brands-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div class="text-slate-500 text-sm">Loading technologies...</div>
+    </div>
+  </section>
+
+  <!-- Social Profiles Section -->
+  <section id="socials" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">Social Profiles</h2>
+    <div id="socials-grid" class="flex flex-wrap gap-4">
+      <div class="text-slate-500 text-sm">Loading social links...</div>
+    </div>
+  </section>
+
   <!-- Contact Section -->
   <section id="contact" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-8">Get In Touch</h2>
-    <p class="text-slate-400">You can reach out for collaborations or inquiries through professional networks and direct channels.</p>
+    <p id="contact-desc" class="text-slate-400 mb-4">You can reach out for collaborations or inquiries through professional networks and direct channels.</p>
+    <div id="contact-email" class="text-indigo-400 font-medium"></div>
   </section>
 
   <!-- Footer -->
@@ -137,7 +165,7 @@
     <p id="footer-text">&copy; 2026 Shivansh Ranjan Tripathi. All rights reserved.</p>
   </footer>
 
-  <!-- Firebase Integration Script -->
+  <!-- Firebase Dynamic Integration Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -156,7 +184,7 @@
 
     async function loadPublicData() {
       try {
-        // Site Settings & SEO
+        // 1. Site Settings & SEO
         const setDoc = await getDoc(doc(db, "settings", "site"));
         if (setDoc.exists()) {
           const s = setDoc.data();
@@ -171,7 +199,7 @@
           if (s.footerText) document.getElementById('footer-text').innerText = s.footerText;
         }
 
-        // Profile Data
+        // 2. Profile Data
         const profDoc = await getDoc(doc(db, "profile", "main"));
         if (profDoc.exists()) {
           const p = profDoc.data();
@@ -184,6 +212,7 @@
           if (p.longBiography || p.bio) document.getElementById('about-bio').innerText = p.longBiography || p.bio;
           if (p.location) document.getElementById('meta-location').innerText = p.location;
           if (p.website) document.getElementById('meta-website').innerText = p.website;
+          if (p.email) document.getElementById('contact-email').innerText = `Email: ${p.email}`;
           if (p.profilePhoto) {
             const img = document.getElementById('hero-avatar-img');
             img.src = p.profilePhoto;
@@ -191,7 +220,6 @@
             document.getElementById('hero-avatar-text').classList.add('hidden');
           }
 
-          // Update Schema.org JSON-LD
           document.getElementById('schema-json').innerText = JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Person",
@@ -203,7 +231,7 @@
           });
         }
 
-        // XNEON Brand Info
+        // 3. XNEON Brand Info
         const xneonDoc = await getDoc(doc(db, "xneon", "main"));
         if (xneonDoc.exists()) {
           const x = xneonDoc.data();
@@ -211,7 +239,28 @@
           if (x.description) document.getElementById('xneon-desc').innerText = x.description;
         }
 
-        // Projects
+        // 4. Education
+        const eduSnap = await getDocs(collection(db, "education"));
+        const eduGrid = document.getElementById('education-grid');
+        if (!eduSnap.empty) {
+          eduGrid.innerHTML = "";
+          eduSnap.forEach(doc => {
+            const e = doc.data();
+            if (e.visible !== false) {
+              eduGrid.innerHTML += `
+                <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-6 space-y-2">
+                  <h3 class="text-lg font-semibold text-white">${e.instituteName || e.name}</h3>
+                  <p class="text-indigo-300 text-sm font-medium">${e.course || e.program || ''}</p>
+                  <p class="text-slate-400 text-sm">${e.description || ''}</p>
+                </div>
+              `;
+            }
+          });
+        } else {
+          eduGrid.innerHTML = '<p class="text-slate-500 text-sm">No education records added yet.</p>';
+        }
+
+        // 5. Projects
         const projSnap = await getDocs(query(collection(db, "projects"), where("published", "==", true)));
         const projGrid = document.getElementById('projects-grid');
         if (!projSnap.empty) {
@@ -224,6 +273,7 @@
                 <div class="p-6 flex flex-col flex-grow space-y-4">
                   <h3 class="text-xl font-semibold text-white">${pr.name}</h3>
                   <p class="text-slate-400 text-sm">${pr.shortDescription || ''}</p>
+                  ${pr.liveUrl ? `<a href="${pr.liveUrl}" target="_blank" rel="noreferrer" class="text-indigo-400 hover:text-indigo-300 text-sm font-medium inline-flex items-center gap-1 mt-auto pt-2">View Live Project ↗</a>` : ''}
                 </div>
               </div>
             `;
@@ -232,7 +282,7 @@
           projGrid.innerHTML = '<p class="text-slate-500 text-sm">No published projects available yet.</p>';
         }
 
-        // Skills
+        // 6. Skills
         const skillSnap = await getDocs(collection(db, "skills"));
         const skillGrid = document.getElementById('skills-grid');
         if (!skillSnap.empty) {
@@ -250,6 +300,44 @@
           });
         } else {
           skillGrid.innerHTML = '<p class="text-slate-500 text-sm">No skills added yet.</p>';
+        }
+
+        // 7. Brands / Technologies
+        const brandSnap = await getDocs(collection(db, "brands"));
+        const brandGrid = document.getElementById('brands-grid');
+        if (!brandSnap.empty) {
+          brandGrid.innerHTML = "";
+          brandSnap.forEach(doc => {
+            const b = doc.data();
+            if (b.visible !== false) {
+              brandGrid.innerHTML += `
+                <div class="bg-slate-800/40 border border-slate-800 rounded-xl p-4 flex items-center gap-3">
+                  <span class="text-white font-medium text-sm">${b.name}</span>
+                </div>
+              `;
+            }
+          });
+        } else {
+          brandGrid.innerHTML = '<p class="text-slate-500 text-sm">No technologies added yet.</p>';
+        }
+
+        // 8. Social Profiles
+        const socSnap = await getDocs(collection(db, "socials"));
+        const socGrid = document.getElementById('socials-grid');
+        if (!socSnap.empty) {
+          socGrid.innerHTML = "";
+          socSnap.forEach(doc => {
+            const so = doc.data();
+            if (so.visible !== false && so.url) {
+              socGrid.innerHTML += `
+                <a href="${so.url}" target="_blank" rel="noreferrer" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                  ${so.platform || so.name || 'Social Link'} ↗
+                </a>
+              `;
+            }
+          });
+        } else {
+          socGrid.innerHTML = '<p class="text-slate-500 text-sm">No social profiles added yet.</p>';
         }
 
       } catch (err) {
